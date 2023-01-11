@@ -1,0 +1,15 @@
+PREFIX movie: <http://example.com/movies#>
+PREFIX dbpedia: <http://dbpedia.org/ontology/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?filmTitle ?filmAbstract ?filmTopic
+WHERE {
+    ?film a movie:Movie;
+        movie:Title ?filmTitle;
+        movie:hasGenre ?filmGenre.
+    ?filmGenre rdfs:label ?filmTopic.
+    SERVICE <http://dbpedia.org/sparql> {
+      ?film dbpedia:abstract ?filmAbstract
+      FILTER (lang(?filmAbstract) = "en") 
+    }
+}
