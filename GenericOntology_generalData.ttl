@@ -1,0 +1,13 @@
+movie:ExampleMovie a movie:Movie;
+movie:Title "Example Movie";
+movie:hasGenre movie:Drama ;
+movie:ActsIn movie:Actor1, movie:Actor2;
+movie:DirectedBy movie:Director1.
+
+movie:Actor1 a movie:Actor;
+rdfs:label "Actor 1" .
+movie:Actor2 a movie:Actor;
+rdfs:label "Actor 2" .
+
+movie:Director1 a movie:Director;
+rdfs:label "Director 1" .
