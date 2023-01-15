@@ -1,0 +1,83 @@
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix movie: <http://example.org/movie#> .
+
+movie:Movie rdf:type owl:Class ;
+    rdfs:label "Movie" ;
+    rdfs:comment "This class represents a movie" ;
+    rdfs:subClassOf skos:Concept .
+
+movie:title rdf:type owl:DatatypeProperty ;
+    rdfs:label "title" ;
+    rdfs:comment "This property is for the movie title, it should be a string" ;
+    rdfs:range xsd:string;
+    rdfs:domain movie:Movie .
+
+movie:director rdf:type owl:ObjectProperty ;
+    rdfs:label "director" ;
+    rdfs:comment "This property is for the movie's director, it should be a Person" ;
+    rdfs:range movie:Person;
+    rdfs:domain movie:Movie .
+
+movie:year rdf:type owl:DatatypeProperty ;
+    rdfs:label "year" ;
+    rdfs:comment "This property is for the year the movie was released, it should be a date" ;
+    rdfs:range xsd:date ;
+    rdfs:domain movie:Movie .
+
+movie:actors rdf:type owl:ObjectProperty ;
+    rdfs:label "actors" ;
+    rdfs:comment "This property is for the movie actors, it should be a list of Person instances" ;
+    rdfs:range rdf:List ;
+    rdfs:domain movie:Movie .
+
+movie:genres rdf:type owl:ObjectProperty ;
+    rdfs:label "genres" ;
+    rdfs:comment "This property is for the movie genres, it should be a list of instances of Genre class" ;
+    rdfs:range rdf:List ;
+    rdfs:domain movie:Movie .
+
+movie:rating rdf:type owl:DatatypeProperty ;
+    rdfs:label "rating" ;
+    rdfs:comment "This property is for the movie rating, it should be a float value" ;
+    rdfs:range xsd:float ;
+    rdfs:domain movie:Movie .
+
+movie:Person rdf:type owl:Class ;
+    rdfs:label "Person" ;
+    rdfs:comment "This class represents a person" .
+
+movie:name rdf:type owl:DatatypeProperty ;
+    rdfs:label "name" ;
+    rdfs:comment "This property is for the person's name, it should be a string" ;
+    rdfs:range xsd:string;
+    rdfs:domain movie:Person .
+
+movie:Genre rdf:type owl:Class ;
+    rdfs:label "Genre" ;
+    rdfs:comment "This class represents a genre of a movie" .
+
+movie:genreName rdf:type owl:DatatypeProperty ;
+    rdfs:label "genreName" ;
+    rdfs:comment "This property is for the genre name, it should be a string" ;
+    rdfs:range xsd:string;
+    rdfs:domain movie:Genre .
+
+movie:Keyword rdf:type owl:Class ;
+    rdfs:label "Keyword" ;
+    rdfs:comment "This class represents a keyword of a movie" .
+
+movie:hasKeyword rdf:type owl:ObjectProperty ;
+    rdfs:label "hasKeyword" ;
+    rdfs:comment "This property is for the movie's keyword, it should be a Keyword instance" ;
+    rdfs:range movie:Keyword;
+    rdfs:domain movie:Movie .
+
+movie:relatedTo rdf:type owl:ObjectProperty ;
+    rdfs:subPropertyOf owl:sameAs;
+    rdfs:label "relatedTo" ;
+    rdfs:comment "This property is for relating a movie to a collection of movies" ;
+    rdfs:domain movie:Movie;
+    rdfs:range movie:Movie .
