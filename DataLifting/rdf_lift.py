@@ -1,4 +1,5 @@
 import json
+from tqdm import tqdm
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
 
@@ -24,16 +25,16 @@ myvocab = Namespace("http://myvocab.org/")
 # On lit le fichier JSON
 with open("../DataEnriching/movies_enriched.json") as json_file:
     data = json.load(json_file)
-    for item in data:
+    for item in tqdm(data):
         film = URIRef("http://example.com/movie/" + str(item["id"]))
         g.add((film, RDF.type, movie.Movie))
         g.add((film, movie.Title, Literal(item["title"])))
         g.add((film, movie.Adult, Literal(item["adult"])))
         g.add((film, movie.Overview, Literal(item["overview"])))
-        g.add((film, movie.Popularity, Literal(item["popularity"])))
+        g.add((film, movie.Popularity, Literal(item["popularity"], datatype=XSD.integer)))
         g.add((film, movie.PosterPath, Literal(item["poster_path"])))
         g.add((film, movie.Video, Literal(item["video"])))
-        g.add((film, movie.VoteAverage, Literal(item["vote_average"])))
+        g.add((film, movie.VoteAverage, Literal(item["vote_average"], datatype=XSD.integer)))
         g.add((film, movie.VoteCount, Literal(item["vote_count"])))
         g.add((film, movie.OriginalLanguage, Literal(item["original_language"])))
         g.add((film, movie.OriginalTitle, Literal(item["original_title"])))
