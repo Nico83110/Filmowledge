@@ -2,6 +2,15 @@ import json
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
 
+
+def to_camel_case(string):
+    string = string.replace('-', ' ')
+    words = string.split(" ")
+    camel_case = ""
+    for word in words[:]:
+        camel_case += word.capitalize()
+    return camel_case
+
 g = Graph()
 
 # On charge les schémas
@@ -32,7 +41,7 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
         if 'topics' in item:
             # Ajouter des triples pour les sujets
             for topic in item['topics']:
-                topic_uri = myvocab[topic.replace(" ", "")]
+                topic_uri = myvocab[to_camel_case(topic)]
                 g.add((film, movie.hasTopic, topic_uri))
                 
         if 'genre_ids' in item:
