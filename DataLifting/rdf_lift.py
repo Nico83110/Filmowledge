@@ -28,10 +28,11 @@ def sparql_request_from_topics(topics):
         ?movie movie:Popularity ?popularity.
         FILTER (?topic IN ( """ + ' '.join(topics) + """))
     }
+    ORDER BY DESC(?popularity)
     """
     qres = g.query(sparql_query)
     for row in qres:
-        print(f"{row.title} is about {row.topic}")
+        print(f"{row.title} is about {row.topic} and has a popularity of {row.popularity}")
 
 
 g = Graph()
