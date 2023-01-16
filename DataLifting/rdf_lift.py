@@ -12,6 +12,28 @@ def to_camel_case(string):
         camel_case += word.capitalize()
     return camel_case
 
+
+'''
+Does a SPARQL request to retrieve the movies from the given topics.
+Topics has to be a list : names = ["Action", "Romantic", "Thriller", ...]
+'''
+def sparql_request_from_topics(topics):
+    topics = [':'+topic for topic in topics] # Add ':' to match the format of topics in the graph
+    sparql_query = """
+    PREFIX movie: <http://example.com/movie#>
+    SELECT *
+    WHERE {
+        ?movie movie:hasTopic ?topic.
+        ?movie movie:Title ?title.
+        ?movie movie:Popularity ?popularity.
+        FILTER (?topic IN ( """ + ' '.join(topics) + """))
+    }
+    """
+    qres = g.query(sparql_query)
+    for row in qres:
+        print(f"{row.title} is about {row.topic}")
+
+
 g = Graph()
 
 # On charge les schémas
@@ -55,3 +77,7 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
 # On peut ensuite sauvegarder le résultat en utilisant la méthode serialize()
 with open("output.ttl", "w") as f:
     f.write(g.serialize(format="turtle"))
+
+
+#Appel d'exemple, pour récupérer les films parlant de Criminals
+sparql_request_from_topics(["Criminals"])
