@@ -10,6 +10,7 @@ g.parse("../DataEnriching/topics.ttl", format="turtle")
 
 # On défini les namespaces utilisés dans le schéma
 movie = Namespace("http://example.com/movie#")
+myvocab = Namespace("http://myvocab.org/")
 
 # On lit le fichier JSON
 with open("../DataEnriching/movies_enriched.json") as json_file:
@@ -27,10 +28,13 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
         g.add((film, movie.VoteCount, Literal(item["vote_count"])))
         g.add((film, movie.OriginalLanguage, Literal(item["original_language"])))
         g.add((film, movie.OriginalTitle, Literal(item["original_title"])))
+
         if 'topics' in item:
+            # Ajouter des triples pour les sujets
             for topic in item['topics']:
-                t = URIRef("http://myvocab.org/" + topic.replace(" ", "_"))
-                g.add((film, movie.hasTopic, t))
+                topic_uri = myvocab[topic.replace(" ", "")]
+                g.add((film, movie.hasTopic, topic_uri))
+                
         if 'genre_ids' in item:
             for genre_id in item['genre_ids']:
                 genre = URIRef("http://myvocab.org/genre/" + str(genre_id))
