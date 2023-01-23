@@ -110,3 +110,15 @@ rdfs:label "relatedTo" ;
 rdfs:comment "This property links a movie to other related movies" ;
 rdfs:domain movie:Movie ;
 rdfs:range movie:Movie .
+
+movie:ActorName a owl:DatatypeProperty ;
+    rdfs:label "ActorName" ;
+    rdfs:comment "This property is for the actor name, it should be a string" ;
+    rdfs:domain movie:Actor ;
+    rdfs:range xsd:string .
+
+movie:ActorRole a owl:DatatypeProperty ;
+    rdfs:label "ActorRole" ;
+    rdfs:comment "This property is for the actor role, it should be a string" ;
+    rdfs:domain movie:Actor ;
+    rdfs:range xsd:string .
