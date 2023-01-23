@@ -2,6 +2,7 @@ import json
 from tqdm import tqdm
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
+from pyshacl import validate
 
 
 def to_camel_case(string):
@@ -42,8 +43,25 @@ g.parse("../ontology/schema/MergedSchemas.ttl", format="turtle")
 g.parse("../DataEnriching/topics.ttl", format="turtle")
 
 # On défini les namespaces utilisés dans le schéma
+RDF = Namespace("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+SH = Namespace("http://www.w3.org/ns/shacl#")
 movie = Namespace("http://example.com/movie#")
 myvocab = Namespace("http://myvocab.org/")
+
+# On charge les contraintes SHACL
+constraints = Graph()
+constraints.parse("../SHACL/BasicConstraints2.ttl", format="turtle")
+
+# On effectue la validation
+print("Validation SHACL des données en cours...")
+conforms, results_graph, results_text = validate(g, shacl_graph=constraints)
+
+if conforms:
+    print("La validation SHACL a réussi !")
+else:
+    # On affiche les résultats de la validation
+    for result in results_graph.subjects(predicate=RDF.type, object=SH.ValidationResult):
+        print(results_graph.value(result, SH.resultMessage))
 
 # On lit le fichier JSON
 with open("../DataEnriching/movies_enriched.json") as json_file:

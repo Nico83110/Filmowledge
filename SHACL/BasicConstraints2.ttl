@@ -1,5 +1,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix movie: <http://example.com/movie#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
 
 # Check that all movies have a title
 movie:MovieShape
