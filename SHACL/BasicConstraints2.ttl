@@ -1,0 +1,37 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix movie: <http://example.com/movie#> .
+
+# Check that all movies have a title
+movie:MovieShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Movie ;
+    sh:property [        sh:path movie:title ;        sh:minCount 1    ] .
+
+# Check that all movies have a director that is an instance of the class movie:Director
+movie:DirectorShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Director ;
+    sh:property [        sh:path movie:name ;        sh:minCount 1    ] .
+
+movie:MovieShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Movie ;
+    sh:property [        sh:path movie:director ;        sh:minCount 1 ;        sh:node movie:DirectorShape    ] .
+
+# Check that all movies have a valid release date
+movie:MovieShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Movie ;
+    sh:property [        sh:path movie:year ;        sh:minCount 1 ;        sh:datatype xsd:date    ] .
+
+# Check that all genres have a name
+movie:GenreShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Genre ;
+    sh:property [        sh:path movie:genreName ;        sh:minCount 1    ] .
+
+# Check that all people have a name
+movie:PersonShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Person ;
+    sh:property [        sh:path movie:name ;        sh:minCount 1    ] .
