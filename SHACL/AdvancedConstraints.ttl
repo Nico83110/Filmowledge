@@ -1,0 +1,36 @@
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix movie: <http://example.com/movie#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+# 1. Vérifier que la propriété "movie:year" est une date cohérente
+movie:FutureYearShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Movie ;
+    sh:property [
+        sh:path movie:year ;
+        sh:minCount 1 ;
+        sh:datatype xsd:date ;
+        sh:pattern "^([1-9][0-9]{3}|[1-9][0-9]{3}-[0-9]{2}-[0-9]{2})"^^xsd:string ;
+        sh:minInclusive "1900-01-01"^^xsd:date
+    ] .
+
+
+# 2. Vérifier que la propriété "movie:actors" contient au moins un acteur connu :
+movie:KnownActorShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Person ;
+    sh:property [
+        sh:path movie:name ;
+        sh:minCount 1 ;
+        sh:in ( "Tom Hanks" "Brad Pitt" "Leonardo DiCaprio" "Robert De Niro" )
+    ] .
+
+movie:MovieShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Movie ;
+    sh:property [
+        sh:path movie:Actor ;
+        sh:minCount 1 ;
+        sh:node movie:KnownActorShape
+    ] .

@@ -43,7 +43,7 @@ def sparql_request_from_topics(topics):
 g = Graph()
 
 # On charge les schémas
-g.parse("../ontology/schema/MergedSchemas.ttl", format="turtle")
+g.parse("../ontology/schema/MoviesSchema.ttl", format="turtle")
 g.parse("../DataEnriching/topics.ttl", format="turtle")
 
 # On défini les namespaces utilisés dans le schéma
@@ -53,19 +53,11 @@ movie = Namespace("http://example.com/movie#")
 myvocab = Namespace("http://myvocab.org/")
 
 # On charge les contraintes SHACL
-constraints = Graph()
-constraints.parse("../SHACL/BasicConstraints2.ttl", format="turtle")
+basicConstraints = Graph()
+advancedConstraints = Graph()
+basicConstraints.parse("../SHACL/BasicConstraints.ttl", format="turtle")
+advancedConstraints.parse("../SHACL/AdvancedConstraints.ttl", format="turtle")
 
-# On effectue la validation
-print("Validation SHACL des données en cours...")
-conforms, results_graph, results_text = validate(g, shacl_graph=constraints)
-
-if conforms:
-    print("La validation SHACL a réussi !")
-else:
-    # On affiche les résultats de la validation
-    for result in results_graph.subjects(predicate=RDF.type, object=SH.ValidationResult):
-        print(results_graph.value(result, SH.resultMessage))
 
 # On lit le fichier JSON du retour de TheMovieDB
 with open("../DataEnriching/movies_enriched.json") as json_file:
@@ -87,21 +79,19 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
     """
     qres = dbpedia.query(dbpedia_query)
     results = json.loads(qres.serialize(format='json'))
-    print('Le retour JSON de la requête SPARQL GAF : ' + str(results))
+    #print('Le retour JSON de la requête SPARQL GAF : ' + str(results))
 
     # On stocke les films de DBPedia dans un dictionnaire pour la comparaison
     dbpedia_films = {}
     #TODO: Résultat vide
     for row in qres:
         film_uri = row[0]
-        print("Uri du film : " + str(film_uri))
         film_name = row[1].value
         film_actor = row[2]
         if film_name not in dbpedia_films:
             dbpedia_films[film_name] = {"uri": film_uri, "actors": [film_actor]}
         else:
             dbpedia_films[film_name]["actors"].append(film_actor)
-    print("NB de films sur DBPedia : " + str(len(dbpedia_films)))
 
     #Boucle sur les films de TheMovieDB
     for item in tqdm(data):
@@ -161,7 +151,6 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
         for row in qres:
             film = URIRef("http://example.com/movie/" + str(item["id"]))
             actor_uri = row[1]
-            print("URI de l'Acteur" + str(actor_uri))
             g.add((film, movie.Actor, actor_uri))
             g.add((actor_uri, RDF.type, movie.Actor))
 
@@ -178,6 +167,24 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
                 g.add((film, movie.hasGenre, genre))
         #if 'release_date' in item:
             #g.add((film, movie.ReleaseDate, Literal(item["release_date"], datatype=XSD.date)))
+
+
+
+# On effectue la validation
+print("Validation SHACL des données en cours...")
+conformsB, results_graphB, results_textB = validate(g, shacl_graph=basicConstraints)
+conformsA, results_graphA, results_textA = validate(g, shacl_graph=advancedConstraints)
+
+
+if conformsB and conformsA:
+    print("La validation SHACL a réussi !")
+else:
+    # On affiche les résultats de la validation
+    for result in results_graphB.subjects(predicate=RDF.type, object=SH.ValidationResult):
+        print(results_graphB.value(result, SH.resultMessage))
+    # On affiche les résultats de la validation
+    for result in results_graphA.subjects(predicate=RDF.type, object=SH.ValidationResult):
+        print(results_graphA.value(result, SH.resultMessage))
 
 # On peut ensuite sauvegarder le résultat en utilisant la méthode serialize()
 with open("output.ttl", "w") as f:

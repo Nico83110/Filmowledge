@@ -1,64 +1,39 @@
-# 1. Tout film doit avoir un titre
-sh:nodeShape
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix movie: <http://example.com/movie#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+
+# Check that all movies have a title
+movie:MovieShape
+    a sh:NodeShape ;
     sh:targetClass movie:Movie ;
-    sh:property [
-        sh:path movie:Title ;
-        sh:minCount 1
-    ] .
+    sh:property [        sh:path movie:title ;        sh:minCount 1    ] .
 
-# 2. Tout film doit avoir au moins un genre
-sh:nodeShape
-    sh:targetClass movie:Movie ;
-    sh:property [
-        sh:path movie:hasGenre ;
-        sh:minCount 1
-    ] .
-
-# 3. Tout film doit être lié à un réalisateur
-sh:nodeShape
-    sh:targetClass movie:Movie ;
-    sh:property [
-        sh:path movie:DirectedBy ;
-        sh:minCount 1
-    ] .
-
-# 4. Tout film doit être lié à au moins un acteur
-sh:nodeShape
-    sh:targetClass movie:Movie ;
-    sh:property [
-        sh:path movie:ActsIn ;
-        sh:minCount 1
-    ] .
-
-# 5. Tous les genres doivent avoir un label
-sh:nodeShape
-    sh:targetClass movie:Genre ;
-    sh:property [
-        sh:path rdfs:label ;
-        sh:minCount 1
-    ] .
-
-# 6. Tous les acteurs doivent avoir un nom
-sh:nodeShape
-    sh:targetClass movie:Actor ;
-    sh:property [
-        sh:path rdfs:label ;
-        sh:minCount 1
-    ] .
-
-# 7. Tous les réalisateurs doivent avoir un nom
-sh:nodeShape
+# Check that all movies have a director that is an instance of the class movie:Director
+movie:DirectorShape
+    a sh:NodeShape ;
     sh:targetClass movie:Director ;
-    sh:property [
-        sh:path rdfs:label ;
-        sh:minCount 1
-    ] .
+    sh:property [        sh:path movie:name ;        sh:minCount 1    ] .
 
-# 8. Tous les films doivent avoir une date de sortie
-sh:nodeShape
+movie:MovieShape
+    a sh:NodeShape ;
     sh:targetClass movie:Movie ;
-    sh:property [
-        sh:path movie:releasedOn;
-        sh:minCount 1;
-        sh:datatype xsd:date
-    ] .
+    sh:property [        sh:path movie:director ;        sh:minCount 1 ;        sh:node movie:DirectorShape    ] .
+
+# Check that all movies have a valid release date
+movie:MovieShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Movie ;
+    sh:property [        sh:path movie:year ;        sh:minCount 1 ;        sh:datatype xsd:date    ] .
+
+# Check that all genres have a name
+movie:GenreShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Genre ;
+    sh:property [        sh:path movie:genreName ;        sh:minCount 1    ] .
+
+# Check that all people have a name
+movie:PersonShape
+    a sh:NodeShape ;
+    sh:targetClass movie:Person ;
+    sh:property [        sh:path movie:name ;        sh:minCount 1    ] .

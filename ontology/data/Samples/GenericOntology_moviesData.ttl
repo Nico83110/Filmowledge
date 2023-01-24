@@ -1,0 +1,33 @@
+movie:TheGodfather a movie:Movie;
+    movie:Title "The Godfather";
+    movie:hasGenre movie:Crime, movie:Drama ;
+    movie:ActsIn movie:MarlonBrando, movie:AlPacino, movie:JamesCaan, movie:RichardSCastellano, movie:RobertDuvall;
+    movie:DirectedBy movie:FrancisFordCoppola.
+
+
+movie:TheDarkKnight a movie:Movie;
+    movie:Title "The Dark Knight";
+    movie:hasGenre movie:Crime, movie:Thriller ;
+    movie:ActsIn movie:ChristianBale, movie:HeathLedger, movie:AaronEckhart, movie:GaryOldman, movie:MaggieGyllenhaal;
+    movie:DirectedBy movie:ChristopherNolan.
+
+
+movie:PulpFiction a movie:Movie;
+    movie:Title "Pulp Fiction";
+    movie:hasGenre movie:Crime, movie:Thriller ;
+    movie:ActsIn movie:JohnTravolta, movie:SamuelLJackson, movie:UmaThurman, movie:HarveyKeitel, movie:BruceWillis;
+    movie:DirectedBy movie:QuentinTarantino.
+
+
+movie:ForrestGump a movie:Movie;
+    movie:Title "Forrest Gump";
+    movie:hasGenre movie:Comedy, movie:Drama ;
+    movie:ActsIn movie:TomHanks, movie:RobinWright, movie:GarySinise;
+    movie:DirectedBy movie:RobertZemeckis.
+
+
+movie:TheSilenceOfTheLambs a movie:Movie;
+    movie:Title "The Silence of the Lambs";
+    movie:hasGenre movie:Thriller, movie:Crime ;
+    movie:ActsIn movie:JodieFoster, movie:AnthonyHopkins, movie:ScottGlenn, movie:TedLevine;
+    movie:DirectedBy movie:JonathanDemme.
