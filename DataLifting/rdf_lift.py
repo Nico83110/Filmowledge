@@ -6,6 +6,7 @@ from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
 from pyshacl import validate
 from Levenshtein import distance
+from fuzzywuzzy import fuzz
 
 
 def to_camel_case(string):
@@ -118,23 +119,16 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
         g.add((film, movie.OriginalTitle, Literal(item["original_title"])))
 
 
-        film_title = item["title"]
         best_match = None
-        best_distance = float("inf")
-        l_distance = 0
-
-        for dbpedia_film_name in dbpedia_films.keys():
-            l_distance = distance(film_title, dbpedia_film_name)
-
-            if l_distance < best_distance:
-                best_distance = l_distance
-                best_match = dbpedia_film_name
-                print("Nom du film TheMovieDB : " + str(film_title))
+        best_ratio = 0
+        for dbpedia_film in dbpedia_films:
+            ratio = fuzz.token_set_ratio(item["title"], dbpedia_film)
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_match = dbpedia_film
 
         if best_match:
             matched_films = dbpedia_films.get(best_match, {}).get("actors", [])
-            print("Nom du film DBPedia matché : " + str(best_match))
-            sleep(2)
             for actor in matched_films:
                 film = URIRef("http://example.com/movie/" + str(item["id"]))
                 g.add((film, movie.Actor, URIRef(actor)))
