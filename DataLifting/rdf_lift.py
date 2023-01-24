@@ -1,10 +1,11 @@
 import json
 import requests
+from time import sleep
 from tqdm import tqdm
 from rdflib import Graph, Namespace, URIRef, Literal
 from rdflib.namespace import RDF, RDFS, XSD
 from pyshacl import validate
-import imdb
+from Levenshtein import distance
 
 
 def to_camel_case(string):
@@ -40,9 +41,6 @@ def sparql_request_from_topics(topics):
 
 g = Graph()
 
-# On crée une instance d'IMDb
-ia = imdb.IMDb()
-
 # On charge les schémas
 g.parse("../ontology/schema/MergedSchemas.ttl", format="turtle")
 g.parse("../DataEnriching/topics.ttl", format="turtle")
@@ -68,11 +66,44 @@ else:
     for result in results_graph.subjects(predicate=RDF.type, object=SH.ValidationResult):
         print(results_graph.value(result, SH.resultMessage))
 
-# On lit le fichier JSON
+# On lit le fichier JSON du retour de TheMovieDB
 with open("../DataEnriching/movies_enriched.json") as json_file:
     data = json.load(json_file)
-    for item in tqdm(data):
 
+
+    # On effectue la requête SPARQL pour récupérer tous les films de DBPedia
+    dbpedia = Graph()
+    dbpedia_query = """
+    PREFIX dbo: <http://dbpedia.org/ontology/>
+    PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+    SELECT ?film ?name ?actor WHERE {
+        SERVICE <http://dbpedia.org/sparql> {
+            ?film a dbo:Film .
+            ?film foaf:name ?name .
+            ?film dbo:starring ?actor .
+                }
+    }
+    """
+    qres = dbpedia.query(dbpedia_query)
+    results = json.loads(qres.serialize(format='json'))
+    print('Le retour JSON de la requête SPARQL GAF : ' + str(results))
+
+    # On stocke les films de DBPedia dans un dictionnaire pour la comparaison
+    dbpedia_films = {}
+    #TODO: Résultat vide
+    for row in qres:
+        film_uri = row[0]
+        print("Uri du film : " + str(film_uri))
+        film_name = row[1].value
+        film_actor = row[2]
+        if film_name not in dbpedia_films:
+            dbpedia_films[film_name] = {"uri": film_uri, "actors": [film_actor]}
+        else:
+            dbpedia_films[film_name]["actors"].append(film_actor)
+    print("NB de films sur DBPedia : " + str(len(dbpedia_films)))
+
+    #Boucle sur les films de TheMovieDB
+    for item in tqdm(data):
         film = URIRef("http://example.com/movie/" + str(item["id"]))
         g.add((film, RDF.type, movie.Movie))
         g.add((film, movie.Title, Literal(item["title"])))
@@ -85,6 +116,31 @@ with open("../DataEnriching/movies_enriched.json") as json_file:
         g.add((film, movie.VoteCount, Literal(item["vote_count"])))
         g.add((film, movie.OriginalLanguage, Literal(item["original_language"])))
         g.add((film, movie.OriginalTitle, Literal(item["original_title"])))
+
+
+        film_title = item["title"]
+        best_match = None
+        best_distance = float("inf")
+        l_distance = 0
+
+        for dbpedia_film_name in dbpedia_films.keys():
+            l_distance = distance(film_title, dbpedia_film_name)
+
+            if l_distance < best_distance:
+                best_distance = l_distance
+                best_match = dbpedia_film_name
+                print("Nom du film TheMovieDB : " + str(film_title))
+
+        if best_match:
+            matched_films = dbpedia_films.get(best_match, {}).get("actors", [])
+            print("Nom du film DBPedia matché : " + str(best_match))
+            sleep(2)
+            for actor in matched_films:
+                film = URIRef("http://example.com/movie/" + str(item["id"]))
+                g.add((film, movie.Actor, URIRef(actor)))
+        else:
+            print(f"Aucun match trouvé pour le film {film_title}")
+
 
         '''
         On fait une requête SPARQL fédérée sur DBPedia pour enrichir le graphe
