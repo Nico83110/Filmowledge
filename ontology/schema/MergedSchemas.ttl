@@ -122,3 +122,63 @@ movie:ActorRole a owl:DatatypeProperty ;
     rdfs:comment "This property is for the actor role, it should be a string" ;
     rdfs:domain movie:Actor ;
     rdfs:range xsd:string .
+
+movie:Adult a owl:DatatypeProperty ;
+    rdfs:label "Adult" ;
+    rdfs:comment "This property is for the adult content, it should be a boolean" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:boolean .
+
+movie:OriginalLanguage a owl:DatatypeProperty ;
+    rdfs:label "OriginalLanguage" ;
+    rdfs:comment "This property is for the original language of the movie, it should be a string" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:string .
+
+movie:OriginalTitle a owl:DatatypeProperty ;
+    rdfs:label "OriginalTitle" ;
+    rdfs:comment "This property is for the original title of the movie, it should be a string" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:string .
+
+movie:Overview a owl:DatatypeProperty ;
+    rdfs:label "Overview" ;
+    rdfs:comment "This property is for the overview of the movie, it should be a string" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:string .
+
+movie:Popularity a owl:DatatypeProperty ;
+    rdfs:label "Popularity" ;
+    rdfs:comment "This property is for the popularity of the movie, it should be a double" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:double .
+
+movie:PosterPath a owl:DatatypeProperty ;
+    rdfs:label "PosterPath" ;
+    rdfs:comment "This property is for the path of the poster of the movie, it should be a string" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:string .
+
+movie:Video a owl:DatatypeProperty ;
+    rdfs:label "Video" ;
+    rdfs:comment "This property is for the availability of the video, it should be a boolean" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:boolean .
+
+movie:VoteAverage a owl:DatatypeProperty ;
+    rdfs:label "VoteAverage" ;
+    rdfs:comment "This property is for the average vote of the movie, it should be a double" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:double .
+
+movie:VoteCount a owl:DatatypeProperty ;
+    rdfs:label "VoteCount" ;
+    rdfs:comment "This property is for the number of votes of the movie, it should be an integer" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range xsd:integer .
+
+movie:hasGenre a owl:ObjectProperty ;
+    rdfs:label "hasGenre" ;
+    rdfs:comment "This property is for the genres of the movie, it should be an object" ;
+    rdfs:domain movie:Movie ;
+    rdfs:range <http://myvocab.org/genre/> .
