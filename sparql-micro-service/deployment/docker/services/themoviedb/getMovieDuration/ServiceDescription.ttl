@@ -1,0 +1,88 @@
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#>.
+@prefix sd:      <http://www.w3.org/ns/sparql-service-description#>.
+@prefix frmt:    <http://www.w3.org/ns/formats/>.
+@prefix dct:     <http://purl.org/dc/terms/>.
+@prefix shacl:   <http://www.w3.org/ns/shacl#>.
+@prefix void:    <http://rdfs.org/ns/void#>.
+@prefix hydra:   <http://www.w3.org/ns/hydra/core#>.
+@prefix schema:  <http://schema.org/>.
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#>.
+@prefix sms:     <http://ns.inria.fr/sparql-micro-service#>.
+
+@base            <http://localhost/service/themoviedb/getMovieDuration/>.
+
+# This file is loaded as graph <ServiceDescription>
+<>
+    a sd:Service, sms:Service;
+    sd:endpoint <>;
+    sd:supportedLanguage sd:SPARQL11Query;
+    sd:feature sd:BasicFederatedQuery, sd:EmptyGraphs;
+    sd:resultFormat frmt:SPARQL_Results_XML, frmt:SPARQL_Results_JSON, frmt:SPARQL_Results_CSV, frmt:SPARQL_Results_TSV,
+                    frmt:RDF_XML, frmt:Turtle, frmt:JSON-LD, frmt:Trig;
+    schema:name "Search for a movie duration that match a given movie ID on TheMovieDB";
+    schema:description '''This SPARQL micro-service searches movies on <a href="https://www.themoviedb.org/" target="_new">TheMovieDB</a>, that match all of the given tags. A maximum of 100 photos are returned.''';
+
+    sd:defaultDataset [
+        a sd:Dataset, void:Dataset;
+        sd:defaultGraph [ a sd:Graph; shacl:shapesGraph <ShapesGraph> ];
+        sd:namedGraph   [ a sd:Graph; sd:name <ServiceDescription> ];
+        sd:namedGraph   [ a sd:Graph; sd:name <ShapesGraph> ];
+
+        void:vocabulary <http://schema.org/>, <http://www.w3.org/ns/shacl#>, <http://www.w3.org/ns/hydra/core#>;
+        void:sparqlEndpoint <>;
+    ];
+
+    schema:keywords "sparql", "microservice", "photography", "themoviedb", "movie", "film", "duration";
+    schema:publisher [ a schema:Organization;
+        schema:name "Université Côte d'Azur, CNRS, Inria, I3S";
+        schema:logo
+            "http://univ-cotedazur.fr/fr/university/communication-presse/charte-et-logos/logo/png/uca-logo-large",
+            "https://iww.inria.fr/dircom/logoinria-eng.png",
+            "http://www.cnrs.fr/themes/custom/cnrs/logo.svg";
+        schema:contactPoint [ a schema:ContactPoint;
+            schema:contactType "technical support";
+            schema:name "Franck Michel";
+            schema:email "franck.michel@cnrs.fr";
+            schema:url <https://w3id.org/people/franckmichel>;
+        ];
+    ];
+
+    sms:exampleQuery '''
+        prefix schema: <https://www.wikidata.org/wiki/>
+
+        SELECT ?id ?duration WHERE {
+
+            ?movie a schema:Film ;
+                schema:UID ?id;
+                schema:duration ?duration.
+        }
+        ''';
+
+    # 432000s = 5 days
+    sms:cacheExpiresAfter "P432000S"^^xsd:duration;
+
+    # Add provenance information to the graph generated at each invocation?
+    sms:addProvenance "false"^^xsd:boolean;
+
+    dct:source [
+        a schema:WebAPI; schema:name "TheMovieDB API";
+        schema:url <https://api.themoviedb.org/>;
+        schema:potentialAction <APIService>;
+    ];
+    .
+
+# Web API service being wrapped by this µ-service + parameters binding
+<APIService>
+    a schema:SearchAction;
+    schema:documentation "Each tag is provided as a value of property schema:keyowrds in the SPARQL graph pattern.";
+    a hydra:IriTemplate;
+    hydra:mapping [
+        hydra:variable "tags";
+        schema:description "Movie ID that retreives its duration must be associated with";
+        hydra:required "true"^^xsd:boolean;
+        skos:example "12443";
+
+        # Use either hydra:property or shacl:sourceShape
+        hydra:property schema:keywords;
+        #shacl:sourceShape <ShapesGraph#NamePropertyShape>;
+    ].
