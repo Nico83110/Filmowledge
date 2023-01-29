@@ -63,9 +63,9 @@ rdfs:domain movie:Person ;
 rdfs:range xsd:string .
 
 movie:Actor a owl:Class ;
-rdfs:label "Actor" ;
-rdfs:comment "A class representing an actor" ;
-rdfs:subClassOf movie:Person .
+    rdfs:label "Actor" ;
+    rdfs:comment "A class representing an actor" ;
+    owl:equivalentClass [ owl:intersectionOf ( movie:Person [ owl:onProperty movie:ActsIn ] ) ] .
 
 movie:ActsIn a owl:ObjectProperty ;
 rdfs:label "ActsIn" ;
@@ -74,9 +74,9 @@ rdfs:domain movie:Actor ;
 rdfs:range movie:Movie .
 
 movie:Director a owl:Class ;
-rdfs:label "Director" ;
-rdfs:comment "A class representing a director" ;
-rdfs:subClassOf movie:Person .
+    rdfs:label "Director" ;
+    rdfs:comment "A class representing a director" ;
+    owl:equivalentClass [ owl:intersectionOf ( movie:Person [ owl:onProperty movie:DirectedBy ] ) ] .
 
 movie:DirectedBy a owl:ObjectProperty ;
 rdfs:label "DirectedBy" ;
