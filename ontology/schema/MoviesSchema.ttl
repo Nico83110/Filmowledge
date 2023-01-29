@@ -22,8 +22,7 @@ movie:Director a owl:ObjectProperty ;
     rdfs:label "director" ;
     rdfs:comment "This property is for the movie's director, it should be a Person" ;
     rdfs:domain movie:Movie ;
-    owl:equivalentClass [ owl:intersectionOf ( movie:Person [ owl:onProperty movie:DirectedBy ] ) ] ;
-    owl:inverseOf movie:DirectedBy .
+    owl:equivalentClass [ owl:intersectionOf ( movie:Person movie:DirectedBy ) ] .
 
 movie:year a owl:DatatypeProperty ;
     rdfs:label "year" ;
@@ -67,7 +66,7 @@ movie:name a owl:DatatypeProperty ;
 movie:Actor a owl:Class ;
     rdfs:label "Actor" ;
     rdfs:comment "A class representing an actor" ;
-    owl:equivalentClass [ owl:intersectionOf ( movie:Person [ owl:onProperty movie:ActsIn ] ) ] .
+    owl:equivalentClass [ owl:intersectionOf ( movie:Person movie:ActsIn ) ] .
 
 movie:ActsIn a owl:ObjectProperty ;
     rdfs:label "ActsIn" ;
@@ -188,7 +187,8 @@ movie:LongMovie a owl:Class ;
     rdfs:label "Long Movie" ;
     rdfs:subClassOf movie:Movie .
 
-[ a owl:Restriction ;
+movie:LongMovieDurationRestriction a owl:Restriction ;
     owl:onProperty movie:duration ;
-    owl:minInclusive "120"^^xsd:decimal ]
-    rdfs:subClassOf movie:LongMovie .
+    owl:minInclusive "120"^^xsd:decimal .
+
+movie:LongMovie rdfs:subClassOf movie:LongMovieDurationRestriction .
