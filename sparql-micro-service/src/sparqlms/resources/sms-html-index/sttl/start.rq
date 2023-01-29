@@ -1,0 +1,16 @@
+@prefix sd:      <http://www.w3.org/ns/sparql-service-description#>.
+@prefix shacl:   <http://www.w3.org/ns/shacl#>.
+@prefix hydra:   <http://www.w3.org/ns/hydra/core#>.
+@prefix schema:  <http://schema.org/>.
+@prefix sms:     <http://ns.inria.fr/sparql-micro-service#>.
+
+template st:start {
+
+    format { <http://localhost/sttl/sms-html-index/tpl1_start.html> "" }
+
+    # Generate one line for each SPARQL micro-service
+    st:call-template(st:oneSms)
+
+    format { <http://localhost/sttl/sms-html-index/tpl3_end.html> st:call-template(st:jsonld-markup) }
+
+} where {}

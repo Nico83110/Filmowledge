@@ -1,0 +1,22 @@
+@prefix schema: <http://schema.org/>
+@prefix taxonomy: <https://wiki.openfoodfacts.org/Taxonomy_Properties>
+@prefix nutri: <https://wiki.openfoodfacts.org/Nutri-Score>
+
+CONSTRUCT {
+
+  [] a taxonomy:allergens ?allergens;
+     schema:gtin ?code;
+     taxonomy:nova ?novaGroup;
+     nutri:nutriscore ?nutritionGrades;
+     schema:name ?productName;
+     schema:size ?productQuantity.
+
+} WHERE {
+
+   [] api:allergens ?allergens;
+     api:code ?code;
+     api:nova_group ?novaGroup;
+     api:nutrition_grades ?nutritionGrades;
+     api:product_name ?productName;
+     api:product_quantity ?productQuantity.
+}

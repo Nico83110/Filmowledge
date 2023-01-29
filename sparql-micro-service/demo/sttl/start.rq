@@ -1,0 +1,20 @@
+prefix dwc:         <http://rs.tdwg.org/dwc/terms/>
+prefix schema:	    <http://schema.org/> .
+
+template st:start {
+    format { <http://localhost/sttl/demo/tpl_start.html> ?scientificName str(?taxon) }
+    
+    st:call-template(st:occurrences)
+    st:call-template(st:imgs)
+    st:call-template(st:traits)
+    st:call-template(st:articles)
+    st:call-template(st:audios)
+    st:call-template(st:others)
+    
+    format { <http://localhost/sttl/demo/tpl_end.html> }
+} where {
+    ?taxon
+        a owl:Class;
+        rdfs:label ?taxonName;
+        dwc:scientificName ?scientificName.
+}

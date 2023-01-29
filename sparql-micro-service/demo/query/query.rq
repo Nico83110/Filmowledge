@@ -1,0 +1,185 @@
+prefix dct:         <http://purl.org/dc/terms/>
+PREFIX dsw:         <http://purl.org/dsw/>.
+prefix dwc:         <http://rs.tdwg.org/dwc/terms/>
+prefix dwciri:      <http://rs.tdwg.org/dwc/iri/>
+prefix rdfs:        <http://www.w3.org/2000/01/rdf-schema#>
+prefix schema:      <http://schema.org/>
+prefix sms:         <http://sms.i3s.unice.fr/schema/>
+prefix taxrefprop:  <http://taxref.mnhn.fr/lod/property/>
+prefix taxrefrk:    <http://taxref.mnhn.fr/lod/taxrank/>
+
+CONSTRUCT {
+    ?taxon a owl:Class;
+        rdfs:label ?taxonName;
+        dwc:scientificName ?scientificName; # TAXREF-LD
+        taxrefprop:occurrence ?occurrence;  # GBIF
+        schema:image ?photo;                # Flickr
+        schema:audio ?audio;                # Macauley Lib
+        schema:subjectOf ?article;          # BHL
+        dct:relation ?measure;              # EoL
+        .
+
+    # Very simple/flat representation of an occurrence as a location
+    ?occurrence                             # GBIF
+        dct:created             ?occDate;
+        dwc:acceptedName        ?occAcceptedName;
+        dwc:recordedBy          ?occRightsHolder;
+        dwc:country             ?occCountry;
+        dwc:countryCode         ?occCountryCode;
+        dwc:decimalLongitude    ?occDecimalLongitude;
+        dwc:decimalLatitude     ?occDecimalLatitude.
+
+    ?photo                                  # Flickr
+        schema:contentUrl       ?img;
+        schema:thumbnailUrl     ?imgThumbnail;
+        schema:author           ?imgAuthor.
+    ?imgAuthor
+        schema:name             ?imgAuthorName;
+        schema:url              ?imgAuthorUrl.
+
+    ?measure a dwc:MeasurementOrFact;       # EoL
+        dwc:measurementType     ?measurementType;
+        dwc:measurementUnit     ?measurementUnit;
+        dwciri:measurementUnit  ?measurementUnitUri;
+        dwc:measurementValue    ?measurementValue.
+
+    ?article a schema:ScholarlyArticle;     # BHL
+        schema:author           ?articleAuthorName;
+        schema:mainEntityOfPage ?articlePage;
+        schema:thumbnailUrl     ?articleThumbnailUrl;
+        schema:description      ?articleCitation.
+
+    ?audio                                  # Macauley Lib
+        schema:contentUrl       ?audioUrl;
+        schema:thumbnailUrl     ?audioThumbnail;
+        schema:mainEntityOfPage ?audioPage;
+        schema:author           ?audioAuthor;
+        schema:description      ?audioDesc.
+
+} WHERE {
+    # First, retrieve the taxon name from the URL query string (?param=taxon+name)
+    BIND(st:get(st:param) as ?param)
+    BIND(if (bound(?param) && ?param != "", ?param, "") as ?taxonName)
+    BIND(sms:bhlService(?taxonName) as ?bhl)
+
+    # -- How we force the evaluation strategy --
+    # We want variables ?taxonName and ?bhl to be "passed" to the BGPs of the union below, e.g. as FILTER() or 
+    # VALUES() clauses. But SPARQL does not impose anything about the evaluation order of the service clauses,
+    # this is left to the engine's strategy.
+    # A heuristic of Corese is to pass a variable ?x as a VALUES() clause to the BGPs only if ?x is
+    # in-scope (https://www.w3.org/TR/sparql11-query/#variableScope) in all BGPs of the union.
+    # To force that, we have to define the variable "fakely" as unbound wherever it is not used in any
+    # triple of a BGP. This is achieved with clauses "values ?x {UNDEF}" either for ?taxonName or for ?bhl.
+
+    # This part is mandatory, it gets the scientific name from TAXREF-LD
+    {
+        values ?bhl {UNDEF}
+        SERVICE <http://taxref.mnhn.fr/sparql> {
+            SELECT DISTINCT * WHERE {
+                ?taxon a owl:Class;
+                    rdfs:label ?taxonName;
+                    taxrefprop:hasReferenceName [ rdfs:label ?scientificName ];
+                    rdfs:isDefinyBy <http://taxref.mnhn.fr/lod/taxref-ld/13.0>.
+            }
+        }
+    }
+
+    # The rest of the query is a "big union" of the results from all SPARQL micro-services
+    {
+        VALUES ?bhl {UNDEF}
+        SERVICE SILENT <https://sparql-micro-services.org/service/gbif/getOccurrencesByName_sd>
+        { SELECT * WHERE {
+            []  a dwc:Taxon;
+                schema:name                     ?taxonName;     # input parameter
+                dwc:acceptedName                ?occAcceptedName.
+
+            ?occurrence a  dwc:Occurrence;
+                dsw:atEvent [
+                    a dwc:Event;
+                    dwc:recordedBy          ?occRightsHolder;
+                    dwc:eventDate           ?occDate;
+                    dsw:locatedAt [
+                       dwc:country          ?occCountry;
+                       dwc:countryCode      ?occCountryCode;
+                       dwc:decimalLongitude ?occDecimalLongitude;
+                       dwc:decimalLatitude  ?occDecimalLatitude;
+                    ];
+                ].
+          } limit 100
+        }
+    }
+
+    UNION {
+        VALUES ?bhl {UNDEF}
+        SERVICE SILENT <https://sparql-micro-services.org/service/flickr/getPhotosByTaxon_sd>
+        { SELECT * WHERE {
+            []  a dwc:Taxon;
+                dwc:scientificName      ?taxonName;     # input parameter
+                schema:image            ?photo.
+            ?photo
+                schema:contentUrl       ?img;
+                schema:thumbnailUrl     ?imgThumbnail;
+                schema:author           ?imgAuthor.
+            ?imgAuthor
+                schema:name             ?imgAuthorName;
+                schema:url              ?imgAuthorUrl.
+        } LIMIT 20 }
+    }
+
+    UNION {
+        VALUES ?bhl {UNDEF}
+        SERVICE SILENT <https://sparql-micro-services.org/service/eol/getTraitsByTaxon_sd>
+        { SELECT * WHERE {
+            []  a dwc:Taxon;
+                dwc:scientificName      ?taxonName;     # input parameter
+                dct:relation            ?measure.
+
+            ?measure a dwc:MeasurementOrFact;
+                dwc:measurementType     ?measurementType;
+                dwc:measurementValue    ?measurementValue.
+            OPTIONAL { ?measure dwc:measurementUnit ?measurementUnit }
+            OPTIONAL { ?measure dwciri:measurementUnit ?measurementUnitUri }
+
+            FILTER (!strStarts(?measurementType, "harvested") && !strStarts(?measurementType, "habitat") && ! strStarts(?measurementType, "water"))
+
+          } LIMIT 20
+        }
+    }
+
+    UNION {
+        values ?taxonName {UNDEF}
+        SERVICE SILENT ?bhl
+        { SELECT * WHERE {
+            ?article
+                schema:name             ?articleTitle;
+                schema:thumbnailUrl     ?articleThumbnailUrl;
+                schema:author           ?articleAuthorName;
+                schema:mainEntityOfPage ?articlePage;
+                schema:isPartOf [
+                   schema:name          ?articleContainerTitle;
+                   schema:datePublished ?articleDate;
+                ].
+          } LIMIT 9
+        }
+        BIND( CONCAT(?articleTitle, ". ", ?articleContainerTitle, " (", ?articleDate, ").") AS ?articleCitation )
+    }
+
+    UNION {
+        VALUES ?bhl {UNDEF}
+        SERVICE SILENT <https://sparql-micro-services.org/service/macaulaylibrary/getAudioByTaxon_sd>
+        { SELECT * WHERE {
+            []  a dwc:Taxon;
+                dwc:scientificName      ?taxonName;     # input parameter
+                schema:audio            ?audio.
+
+            ?audio
+                schema:contentUrl ?audioUrl; schema:thumbnailUrl ?audioThumbnail;
+                schema:mainEntityOfPage ?audioPage; schema:author ?audioAuthor; schema:description ?audioDesc.
+          } limit 6
+        }
+    }
+}
+
+function sms:bhlService(?name) {
+    IRI(concat("https://sparql-micro-services.org/service/bhl/getArticlesByTaxon?name=", encode_for_uri(?name)))
+}

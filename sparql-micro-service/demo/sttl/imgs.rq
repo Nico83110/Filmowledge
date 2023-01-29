@@ -1,0 +1,16 @@
+prefix schema:	<http://schema.org/> .
+
+template st:imgs {
+    format { <http://localhost/sttl/demo/tpl_imgs.html>
+        group { format { <http://localhost/sttl/demo/tpl_img_gallery.html> ?imgUrl ?imgThumbnail ?imgAuthorName } }
+    }
+} where {
+    ?taxon a owl:Class;
+        schema:image [
+            schema:contentUrl ?imgUrl; schema:thumbnailUrl ?imgThumbnail;
+            schema:author [
+                schema:name ?imgAuthorName;
+                schema:url ?imgAuthorUrl
+            ]
+        ].
+}

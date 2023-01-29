@@ -1,0 +1,14 @@
+*~
+_do_not_commit
+logs
+demo-static
+.settings
+.project
+.buildpath
+vendor
+composer.lock
+.metadata
+.recommenders
+composer.phar
+.ipynb*
+src/common/Utils.php.bak

@@ -1,0 +1,20 @@
+@prefix sd:      <http://www.w3.org/ns/sparql-service-description#>.
+@prefix hydra:   <http://www.w3.org/ns/hydra/core#>.
+@prefix schema:  <http://schema.org/>.
+@prefix sms:     <http://ns.inria.fr/sparql-micro-service#>.
+
+# Read the Web API query string template and other config parameters
+# from the service description graph of a SPARQL micro-service
+SELECT ?apiQuery ?expiresAfter ?addProvenance WHERE {
+
+    <{serviceUri}> 
+        a sd:Service;
+        dct:source [
+            schema:potentialAction [ hydra:template ?apiQuery ]
+        ].
+        
+   OPTIONAL { <{serviceUri}> sms:cacheExpiresAfter ?expiresAfter. }
+
+   OPTIONAL { <{serviceUri}> sms:addProvenance ?addProvenance. }
+}
+

@@ -1,0 +1,64 @@
+@prefix sd:      <http://www.w3.org/ns/sparql-service-description#>.
+@prefix dct:     <http://purl.org/dc/terms/>.
+@prefix shacl:   <http://www.w3.org/ns/shacl#>.
+@prefix hydra:   <http://www.w3.org/ns/hydra/core#>.
+@prefix schema:  <http://schema.org/>.
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#>.
+@prefix sms:     <http://ns.inria.fr/sparql-micro-service#>.
+
+template st:oneSms {
+
+    format { <http://localhost/sttl/sms-html-index/tpl2_oneSms.html> ?serviceUri ?serviceName ?webApiCode ?serviceDescription ?keywords }
+
+} where {
+    # Retrieve the root URL from the query string parameter (e.g. ?param=http://example.org/service)
+    BIND(st:get(st:param) as ?rootUrl)
+
+    ?serviceUri
+        a sd:Service;
+        schema:name ?serviceDescription;
+        dct:source ?source.
+
+    ?source
+        a schema:WebAPI;
+        schema:name ?webApiName.
+
+    OPTIONAL { ?source schema:url ?webApiUrl }
+
+    BIND(
+        if (bound(?webApiUrl),
+            concat( '<a href="', ?webApiUrl, '" target="_new">', ?webApiName, '</a>'),
+            ?webApiName
+        )
+        as ?webApiCode
+    )
+
+    # Extract the service short name from the service URL
+    BIND(strafter(str(?serviceUri), str(?rootUrl)) as ?serviceName)
+
+    # Get the list of keywords and turn it into a CSV string
+    BIND(sms:listKeywords(?serviceUri) as ?keywords)
+
+    # Select only services with the given root url
+    FILTER(strstarts(str(?serviceUri), str(?rootUrl)))
+
+} ORDER BY ?webApiName
+
+
+# Get the list of keywords associated to a service and turn it into a CSV string
+function sms:listKeywords(?s) {
+    let (?keywords = select distinct * where { ?s schema:keywords ?k }) {
+        set (?strList = "");
+        for (?mapping in ?keywords) {
+            for ((?var, ?val) in ?mapping) {
+                if (str(?var) = "?k") {
+                    if (?strList = "")
+                        { set (?strList = ?val) }
+                    else
+                        { set (?strList = concat(?strList, ", ", ?val)) }
+                }
+            }
+        };
+        return (?strList)
+    }
+}
