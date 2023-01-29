@@ -1,0 +1,10 @@
+@prefix schema: <https://www.wikidata.org/wiki/>
+
+CONSTRUCT {
+    ?b1 schema:UID ?id .
+	?b1 schema:duration ?duration.
+
+} WHERE {
+   ?b1 api:id ?id .
+   ?b1 api:runtime ?duration.
+}

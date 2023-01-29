@@ -1,13 +1,10 @@
 @prefix schema: <https://www.wikidata.org/wiki/>
 
 CONSTRUCT {
-    ?movie a schema:film ;
-	  schema:UID ?id ;
-	  schema:duration ?duration .
+    ?b1 schema:UID ?id .
+	?b1 schema:duration ?duration.
 
 } WHERE {
-
-   ?movie
-     api:id ?id ;
-     api:runtime ?duration .
+   ?b1 api:id ?id .
+   ?b1 api:runtime ?duration.
 }
