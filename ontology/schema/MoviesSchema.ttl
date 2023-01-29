@@ -17,11 +17,13 @@ movie:title a owl:DatatypeProperty ;
     rdfs:domain movie:Movie ;
     rdfs:range xsd:string .
 
+#Cela signifie que si un film a un réalisateur, le réalisateur a réalisé ce film.
 movie:director a owl:ObjectProperty ;
     rdfs:label "director" ;
     rdfs:comment "This property is for the movie's director, it should be a Person" ;
     rdfs:domain movie:Movie ;
     rdfs:range movie:Director .
+    owl:inverseOf movie:DirectedBy .
 
 movie:year a owl:DatatypeProperty ;
     rdfs:label "year" ;
@@ -44,7 +46,7 @@ movie:hasGenre a owl:ObjectProperty ;
 movie:Genre a owl:Class ;
     rdfs:label "Genre" ;
     rdfs:comment "This class represents a genre of a movie" ;
-    skos:inScheme movie:genres .
+    a owl:TransitiveProperty .
 
 movie:genreName a owl:DatatypeProperty ;
     rdfs:label "genreName" ;
